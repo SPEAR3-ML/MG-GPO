@@ -155,7 +155,30 @@ while iter < Ngen
         end
         ft = mass_eval_GP(ft,da,Nobj,Nvar);
         ft = non_domination_sort_mod(ft, Nobj, Nvar);
-        f0 = ft(1:Npop,1:Nvar+Nobj);
+        cnt = 0;
+        f0=[];
+        f_indx = 1;
+        while 1 %cnt<Npop
+            indx_f = find(ft(:,Nobj+Nvar+1)==f_indx);    
+            if cnt+length(indx_f)>Npop
+                f0 = ft(1:cnt,1:Nvar+Nobj);
+                
+                [crd_s, indx_scrd] = sort(ft(indx_f,end),'descend');
+                f0 = [f0; ft(indx_scrd(1:Npop-cnt),1:Nvar+Nobj)];
+                break;
+            else
+                cnt = cnt+length(indx_f);
+                f_indx = f_indx + 1;
+            end
+            
+            
+        end
+        
+        %original
+        %f0 = ft(1:Npop,1:Nvar+Nobj);
+        
+        
+        
         
     else
         ft = mopsomain(@(f,M,V)mass_eval_GP(f,da,M,V),Npop*2,10,Nobj,Nvar);
