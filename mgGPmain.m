@@ -1,18 +1,30 @@
-function gbest = mgGPmain(func_mass,Npop,Ngen,Nobj,Nvar,varargin)
+function gbest = mgGPmain(func_mass,Npop,Ngen,Nobj,Nvar,vrange,varargin)
 %main function for multi-geneartion Gaussian Process optimizer (mgGPO)
 %created by X. Huang, 6/18/2019
-%
+% 
+    teeport = Teeport('ws://lambda-sp3:8090/');
+% evaluate = teeport.useEvaluator('Cx67ynqM');
+GPy_output = teeport.useProcessor('rO-EbCQPc');
+cleanup = @teeport.cleanUp;
 
 global g_mum
 if isempty(g_mum)
     g_mum = 60;
 end
 
-if nargin==5
+if nargin==6
     %intialize and evaluate
 %     [f0,v0,gbest] = mopso_initialize(func_mass,Npop,Ngen,Nobj,Nvar);
+    M = Nobj; 
+    V = Nvar;
+    l_limit = vrange(:,1);
+    u_limit = vrange(:,2);
+    delta_range = vrange(:,3);
     [f0,v0,pbest,gbest] = mopso_initialize(func_mass,Npop,Ngen,Nobj,Nvar);
-    
+%     load('f0.mat');
+%     load('v0.mat');
+%     load('pbest.mat');
+%     load('gbest.mat');
     da.Xmat=f0(:,1:Nvar)';
     da.fa_list = f0(:,Nvar+1:Nvar+Nobj);
     da.mu_prior = mean(da.fa_list);
@@ -22,7 +34,14 @@ if nargin==5
     
     da.dim = Nvar;
     da.nf = size(f0,1);
-    da.bet = 0.5;
+%     da.bet = 2;
+    
+%     ffa_1 = f0(:,Nvar+1) - da.mu_prior(1);
+%     ffa_2 = f0(:,Nvar+2) - da.mu_prior(2);
+    ffa_1 = f0(:,Nvar+1);
+    ffa_2 = f0(:,Nvar+2);
+    ffa = [ffa_1, ffa_2];
+    Xmat = da.Xmat';
     
     %theta = 0.1*ones(Nvar,Nobj);
     theta = 0.4;
@@ -31,13 +50,16 @@ if nargin==5
     da.gbest = f0; 
 
     sigy = 0; %for now
-    for ii=1:Nobj
-        Kmat = da.Sig2_prior(ii)*kernel_matrix(da.Xmat,da.theta); %da.theta(:,ii));
-        da.invKmat_list{ii} = inv(Kmat+sigy^2*eye(da.nf));
-    end
+%     for ii=1:Nobj
+%         Kmat = da.Sig2_prior(ii)*kernel_matrix(da.Xmat,da.theta); %da.theta(:,ii));
+%         da.invKmat_list{ii} = inv(Kmat+sigy^2*eye(da.nf));
+%     end
+    time0 = datestr(clock,'YYYY/mm/dd HH:MM:SS.FFF');
+    load('intial_time.mat','t0');
+    td = (datenum(time0)-datenum(t0))*24*3600;
     save generation_0.mat 
     
-elseif nargin>=6
+elseif nargin>=7
     da = varargin{1};
     
 %     da.Xmat=[da.Xmat xt];
@@ -49,15 +71,25 @@ elseif nargin>=6
     v0 = da.v0;
 end
 
-w = 0.4; %gset_mopso.w;
-c1 = 1.0; %gset_mopso.c1;
-c2 = 1.0; %gset_mopso.c2;
-
+% w = 0.4; %gset_mopso.w;
+% c1 = 1.0; %gset_mopso.c1;
+% c2 = 1.0; %gset_mopso.c2;
+w_max = 0.9;
+w_min = 0.4;
+c1_max = 2.5;
+c2_max = 2.5;
+c1_min = 0.5;
+c2_min = 0.5;
 
 iter = 0;
 while iter < Ngen
     iter = iter + 1;
-    
+    da.bet = 2*0.85^(iter-1);
+%         if iter <= 20
+%             da.bet = 2 - iter/20;
+%         else
+%             da.bet = 0;
+%         end
     f0(:,Nvar+1:end) = [];
     
         
@@ -112,10 +144,13 @@ while iter < Ngen
             end
         
     elseif 1
-        r1 = rand; %0.5+0.15*randn;
-        r2 = rand; %0.5+0.15*randn;
+        r1 = 1; %0.5+0.15*randn;
+        r2 = 1; %0.5+0.15*randn;
         ft = [];
         cnt = 0;
+        w = w_max - (w_max - w_min) * iter / Ngen;
+        c1 = (c1_min - c1_max) * iter / Ngen + c1_max;
+        c2 = (c2_max - c2_min) * iter / Ngen + c2_min;
         for ii=1:Npop
             rnd = max(1,round(Npop*0.3*rand));
             %v0(ii,:) = w*v0(ii,:)+c1*r1*(pbest(ii,1:Nvar) - f0(ii,1:Nvar))+c2*r2*(gbest(rnd,1:Nvar) - f0(ii,1:Nvar));
@@ -129,34 +164,114 @@ while iter < Ngen
         %random offset from each parameter within a sphere
 %         cnt = 0;
 %         ft = [];
+        mu = 20;
+        mum = 20;
         for ii=1:Npop
            x0 = gbest(ii,1:Nvar);
            for jj=1:20
                cnt = cnt+1;
-               ft(cnt,:) = x0+(1-2*rand(1,Nvar))*0.05;
+                 for j = 1 : size(x0,2)
+                   r(j) = rand(1);
+                     if r(j) < 0.5
+                      delta(j) = (2*r(j)+(1-2*r(j))*(1-(x0(j)-l_limit(j))/(u_limit(j)-l_limit(j)))^(mum+1))^(1/(mum+1)) - 1;
+                     else
+                      delta(j) = 1 - (2*(1-r(j))+2*(r(j)-0.5)*(1-(u_limit(j)-x0(j))/(u_limit(j)-l_limit(j)))^(mum+1))^(1/(mum+1));
+                     end
+                 end
+               ft(cnt,:) = x0+delta;
+%                ft(cnt,:) = x0+(1-2*rand(1,Nvar))*0.05;
 %                ft(cnt,:) = x0+(1-2*rand(1,Nvar))*0.03;
            end
-           for jj=1:20
+           for jj=1:10
                indx = randi(Npop);
                if indx==ii
                    continue;
                else
                    rdist = rand;
-                   cnt = cnt+1;
-                   ft(cnt,:) = x0+(gbest(indx,1:Nvar)-x0)*rdist;    
+                   cnt = cnt+2;
+                   m = cnt - 1;
+                   n = cnt;
+                   parent_1 = x0;
+                   parent_2 = gbest(indx,1:Nvar);
+                   
+                   uuu=zeros(1,size(x0,2));
+                   uuuu=zeros(1,size(x0,2));
+                   for j = 1 : size(x0,2)
+                     u(j) = rand(1);
+                      if u(j) <= 0.5
+                         bq(j) = (2*u(j))^(1/(mu+1));
+                      else
+                         bq(j) = (1/(2*(1 - u(j))))^(1/(mu+1));
+                      end
+                         bq(j) = bq(j)*(-1)^randi([0,1]);
+%                          uu(j) = rand(1);
+%                     if uu(j) < 0.5
+%                          bq(j) = 1;
+%                     end
+%                          uuu(j) = rand(1);
+%                          uuuu(j) = uuu(1);
+%                     if uuuu(j) > 0.5
+%                          bq(j) = 1;
+%                     end
+                    child_1(j) = 0.5*(((1 + bq(j))*parent_1(j)) + (1 - bq(j))*parent_2(j));
+                    child_2(j) = 0.5*(((1 - bq(j))*parent_1(j)) + (1 + bq(j))*parent_2(j));
+                   end
+                    ft(m,:) = child_1;
+                    ft(n,:) = child_2;
+%                    ft(cnt,:) = x0+(gbest(indx,1:Nvar)-x0)*rdist;    
                end
                
            end
             
         end
 %         da.bet = da.bet*1.2;
-        if da.bet>1
-            da.bet = 1.0;
+%         if da.bet>1
+%             da.bet = 1.0;
+%         end
+        for ii=1:length(ft)
+            for iv=1:Nvar
+               if ft(ii,iv)<0
+                   ft(ii,iv) = 0;
+               end
+               if ft(ii,iv)>1
+                   ft(ii,iv) = 1;
+               end
+            end
         end
-        ft = mass_eval_GP(ft,da,Nobj,Nvar);
-        ft = non_domination_sort_mod(ft, Nobj, Nvar);
-        f0 = ft(1:Npop,1:Nvar+Nobj);
         
+        C = load(['generation_' num2str(iter-1) '.mat'],'Xmat', 'ffa');
+        C1 = {C.Xmat, C.ffa};
+        Y1 = {{C1,ft}};
+        ft_obj = GPy_output(Y1);
+%         ft = mass_eval_GP(ft,da,Nobj,Nvar);
+        ft_obj1 = reshape(ft_obj(1,:,:),[],2);
+        ft_obj2 = reshape(ft_obj(2,:,:),[],2);
+%         ft = [ft,ft_obj1,ft_obj2];
+        ft = [ft,ft_obj1-da.bet.*ft_obj2,ft_obj2];
+        ft = non_domination_sort_mod(ft, Nobj, Nvar);
+        cnt = 0;
+        f0=[];
+        f_indx = 1;
+        while 1 %cnt<Npop
+            indx_f = find(ft(:,Nobj+Nvar+1)==f_indx);    
+            if cnt+length(indx_f)>Npop
+                f0 = ft(1:cnt,1:Nvar+Nobj);
+                
+                [crd_s, indx_scrd] = sort(ft(indx_f,end),'descend');
+                f0 = [f0; ft(indx_scrd(1:Npop-cnt),1:Nvar+Nobj)];
+                break;
+            else
+                cnt = cnt+length(indx_f);
+                f_indx = f_indx + 1;
+            end
+            
+            
+        end
+        
+        %original
+        %f0 = ft(1:Npop,1:Nvar+Nobj);
+        
+          
     else
         ft = mopsomain(@(f,M,V)mass_eval_GP(f,da,M,V),Npop*2,10,Nobj,Nvar);
         ft = non_domination_sort_mod(ft, Nobj, Nvar);
@@ -179,7 +294,7 @@ while iter < Ngen
                end
             end
         end
-%     f0m = f0; %model f0
+    f0m = f0; %model f0
     f0=func_mass(f0, Nobj, Nvar);
     
     %update pbest
@@ -208,31 +323,42 @@ while iter < Ngen
         da.dim = Nvar;
         %da.nf = size(f0,1);
         da.nf = size(fa,1);
-
+        
+%         ffa_1 = fa(:,Nvar+1) - da.mu_prior(1);
+%         ffa_2 = fa(:,Nvar+2) - da.mu_prior(2);
+%         X1 = {da.Xmat', ffa_1, ffa_2};
+        ffa_1 = fa(:,Nvar+1);
+        ffa_2 = fa(:,Nvar+2);
+        ffa = [ffa_1, ffa_2];
+        Xmat = da.Xmat';
+        
         %theta = 0.1*ones(Nvar,Nobj);
         theta = 0.4;
         da.theta = theta;  %scalar for now, should be Nvar \times Nobj in dimension
         da.gbest = f0; 
 
-        sigy = 0.0001; %for now
-        for ii=1:Nobj
-            Kmat = da.Sig2_prior(ii)*kernel_matrix(da.Xmat,da.theta); %da.theta(:,ii));
-            da.invKmat_list{ii} = pinv(Kmat+sigy^2*eye(da.nf));
-        end
+        sigy = 1e-4; %for now
+%         for ii=1:Nobj
+%             Kmat = da.Sig2_prior(ii)*kernel_matrix(da.Xmat,da.theta); %da.theta(:,ii));
+%             da.invKmat_list{ii} = pinv(Kmat+sigy^2*eye(da.nf));
+%         end
 
     end
-
+    time = datestr(clock,'YYYY/mm/dd HH:MM:SS.FFF');
+    td = (datenum(time)-datenum(t0))*24*3600;
     save(['generation_' num2str(iter) '.mat']);
 end
 
-
+% plat.cleanUp();
+cleanup();
 end %function
 
 
+
     function [f0,v0,pbest,gbest] = mopso_initialize(func_mass,Npop,Ngen,Nobj,Nvar)
-        
+       
     f0 = rand(Npop,Nvar+Nobj); %uniform
-    %f0 = (1-2*rand(Npop,Nvar+Nobj))*0.15+0.5; %uniform cube around center
+%     f0 = (1-2*rand(Npop,Nvar+Nobj))*0.15+0.5; %uniform cube around center
         
         f0(:,Nvar+1:end) = NaN;
         

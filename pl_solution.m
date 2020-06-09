@@ -1,8 +1,8 @@
 clear
 % genl = [1:3:14]; % [1:10:51];
-genl = [1:10:100, 100];
-
-dire = 'test1_ZDT1_pop100_gen100_bet=pt5';
+% genl = [1:10:100, 100];
+genl = [50];
+dire = '.';
 
 for ig=1:length(genl)
    load([dire filesep 'generation_' num2str(genl(ig)) '.mat']);
@@ -20,30 +20,36 @@ end
 %% plot
 cl = colormap;
 
-figure(202)
+figure(206)
 for ii=1:length(genl)
-h(ii) = plot(dall(ii).gbest(:,Nvar+1),dall(ii).gbest(:,Nvar+2),'s');
-set(h(ii),'color',cl(ii*7,:));
+h(ii) = plot(dall(ii).gbest(:,Nvar+1),dall(ii).gbest(:,Nvar+2),'.','markersize',20);
+% set(h(ii),'color',cl(ii*7,:));
 
 hold on
 end
-hold off
+% hold off
 xlabel('obj 1')
 ylabel('obj 2')
 title('gbest')
 legend(h, cstr);
-title(['MOPSO, gbest, POP=' num2str(Npop)])
-
-set(gca,'yscale','log','xscale','log');
+title(['MGGPO, gbest, POP=' num2str(Npop)])
+hold on
+Nobj = 2;
+Nvar = 8;
+Npop = 80;
+Ngen = 50;
+PF=PF(Nobj,1000);
+plot(PF(:,1),PF(:,2),'.','markersize',20)
+% set(gca,'yscale','log','xscale','log');
 
 figure(203)
 for ii=1:length(genl)
 h(ii) = plot(dall(ii).f0(:,Nvar+1),dall(ii).f0(:,Nvar+2),'s');
-set(h(ii),'color',cl(ii*7,:));
+% set(h(ii),'color',cl(ii*7,:));
 
 hold on
 end
-hold off
+% hold off
 xlabel('obj 1')
 ylabel('obj 2')
 title('f0')

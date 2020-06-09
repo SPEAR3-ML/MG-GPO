@@ -17,7 +17,7 @@ for i=1:N
         obj1 = func_obj4(x);
         [obj2,p] = func_Rosenbrock(x);
     elseif 1
-        [obj1,obj2,p] = func_ZDT1(x);
+        [obj1,obj2,p] = func_ZDT2(x);
     end
     
     global g_sigy;

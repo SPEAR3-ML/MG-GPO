@@ -2,12 +2,13 @@
 %created by X. Huang, 1/8/2014
 
 clear
-
+t0 = datestr(clock,'YYYY/mm/dd HH:MM:SS.FFF');
+save intial_time.mat
 Nobj = 2;
 Nvar = 30;
 
-Npop = 100;
-Ngen = 100;
+Npop = 80;
+Ngen = 50;
 
 NMAX = (Ngen)*Npop;
 
@@ -43,7 +44,7 @@ global g_cnt g_data
 g_data=[];
 g_cnt = 0;
 
-gbest=mgGPmain(@mass_evaluate,Npop,Ngen,Nobj,Nvar);
+gbest=mgGPmain(@mass_evaluate,Npop,Ngen,Nobj,Nvar,vrange);
 % diary off
 
 % save tmpmgGPdata
