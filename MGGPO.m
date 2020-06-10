@@ -7,7 +7,7 @@ function gbest = MGGPO(Npop,Ngen,Nobj,Nvar,varargin)
 % % evaluate = teeport.useEvaluator('Cx67ynqM');
 % GPy_output = teeport.useProcessor('Tv10tpVPM');  % Load the platform Processor ID
 % cleanup = @teeport.cleanUp;
-global evaluate GPy_output cleanup vrange
+global evaluate gpPredict cleanUp
 %**************************************************************************
 
 global g_mum
@@ -20,7 +20,7 @@ if nargin==4
     % [f0,v0,gbest] = mopso_initialize(func_mass,Npop,Ngen,Nobj,Nvar);
     M = Nobj;
     V = Nvar;
-    vrange1 = ones(Nvar,1)*[0, 1,1e-6]*1;  %*5
+    vrange1 = ones(Nvar,1)*[0,1,1e-6]*1;  %*5
     l_limit = vrange1(:,1);
     u_limit = vrange1(:,2);
     delta_range = vrange1(:,3);
@@ -48,7 +48,7 @@ if nargin==4
     %         da.invKmat_list{ii} = inv(Kmat+sigy^2*eye(da.nf));
     %     end
     %     save generation_0.mat
-    save('generation_0.mat','-regexp','^(?!(cleanup|evaluate|GPy_output|teeport)$).');
+    save('generation_0.mat','-regexp','^(?!(cleanUp|evaluate|gpPredict|teeport)$).');
 elseif nargin>=5
     da = varargin{1};
     
@@ -217,7 +217,7 @@ while iter < Ngen
         C = load(['generation_' num2str(iter-1) '.mat'],'Xmat', 'ffa');
         C1 = {C.Xmat, C.ffa};
         Y1 = {{C1,ft}};
-        ft_obj = GPy_output(Y1);
+        ft_obj = gpPredict(Y1);
         ft_obj1 = reshape(ft_obj(1,:,:),[],2);
         ft_obj2 = reshape(ft_obj(2,:,:),[],2);
         ft = [ft,ft_obj1-da.bet.*ft_obj2,ft_obj2];
@@ -265,7 +265,6 @@ while iter < Ngen
     %**************************************************************************
     f0m = f0; % model predicted solutions
     X = f0(:,1:Nvar);
-    X = vrange(:,1)' + (vrange(:,2) - vrange(:,1))'.*X;
     Y = evaluate(X);
     f0(:,Nvar+1:Nvar+Nobj) = Y;
     %     f0=func_mass(f0, Nobj, Nvar); % evaluted solutions
@@ -310,7 +309,7 @@ while iter < Ngen
         %         end
     end
     %     save test -regexp ^(?!(variableToExclude1|variableToExclude2)$).
-    save(['generation_' num2str(iter) '.mat'],'-regexp','^(?!(cleanup|evaluate|GPy_output|teeport)$).');
+    save(['generation_' num2str(iter) '.mat'],'-regexp','^(?!(cleanUp|evaluate|gpPredict|teeport)$).');
 end
 
-cleanup();
+cleanUp();

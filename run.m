@@ -17,8 +17,7 @@ useTeeport = 1;
 plotResults = 0;
 
 %% Initialization
-global vrange g_sigy g_cnt g_data evaluate GPy_output cleanup
-vrange = ones(Nvar,1)*[0,1,1e-6]*1; % define the range
+global g_sigy g_cnt g_data evaluate gpPredict cleanUp;
 g_sigy = 0.0; % define the nosie
 g_data = [];
 g_cnt = 0;
@@ -31,12 +30,12 @@ end
 if useTeeport ~= 0
     teeport = Teeport('ws://lambda-sp3:8090/');
     evaluate = teeport.useEvaluator(problem);
-    GPy_output = teeport.useProcessor('Tv10tpVPM');
-    cleanup = @teeport.cleanUp;
+    gpPredict = teeport.useProcessor('Tv10tpVPM');
+    cleanUp = @teeport.cleanUp;
 else
     evaluate = problem;
-    GPy_output;
-    cleanup;
+    gpPredict;
+    cleanUp;
 end
 gbest = MGGPO(Npop,Ngen,Nobj,Nvar);
 % diary off
@@ -76,9 +75,8 @@ elseif plotResults == 4
     ylabel('obj2');
 elseif plotResults == 5
     % print out some stuff for debug
-    [data_1,xm,fm] = process_scandata(g_data(:,2:end),Nvar,vrange,'plot');
-    [xm(:)', fm]
-    
+    % [data_1,xm,fm] = process_scandata(g_data(:,2:end),Nvar,vrange,'plot');
+    % [xm(:)', fm]
     pl_solution;
 end
 
