@@ -1,4 +1,4 @@
-function gbest = MGGPO(evaluate,gpPredict,Npop,Ngen,Nobj,Nvar,varargin)
+function gbest = MGGPO(evaluate,predict,Npop,Ngen,Nobj,Nvar,varargin)
 % main function for Multi-Geneartion Gaussian Process Optimizer (MG-GPO)
 % created by X. Huang, 6/18/2019
 
@@ -39,7 +39,7 @@ if nargin == 6
     %         da.invKmat_list{ii} = inv(Kmat+sigy^2*eye(da.nf));
     %     end
     %     save generation_0.mat
-    save('generation_0.mat','-regexp','^(?!(cleanUp|evaluate|gpPredict|teeport)$).');
+    save('generation_0.mat','-regexp','^(?!(cleanUp|evaluate|predict|teeport)$).');
 elseif nargin > 6
     da = varargin{1};
     
@@ -208,7 +208,7 @@ while iter < Ngen
         C = load(['generation_' num2str(iter-1) '.mat'],'Xmat', 'ffa');
         C1 = {C.Xmat, C.ffa};
         Y1 = {{C1,ft}};
-        ft_obj = gpPredict(Y1);
+        ft_obj = predict(Y1);
         ft_obj1 = reshape(ft_obj(1,:,:),[],2);
         ft_obj2 = reshape(ft_obj(2,:,:),[],2);
         ft = [ft,ft_obj1-da.bet.*ft_obj2,ft_obj2];
@@ -300,5 +300,5 @@ while iter < Ngen
         %         end
     end
     %     save test -regexp ^(?!(variableToExclude1|variableToExclude2)$).
-    save(['generation_' num2str(iter) '.mat'],'-regexp','^(?!(cleanUp|evaluate|gpPredict|teeport)$).');
+    save(['generation_' num2str(iter) '.mat'],'-regexp','^(?!(cleanUp|evaluate|predict|teeport)$).');
 end

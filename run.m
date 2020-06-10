@@ -18,7 +18,7 @@ plotResults = 1;
 
 %% Initialization
 global g_sigy g_cnt g_data;
-g_sigy = 0.0; % define the nosie
+g_sigy = 0.0; % define the noise
 g_data = [];
 g_cnt = 0;
 
@@ -27,16 +27,16 @@ if useTeeport ~= 0
     % Connect to the platform
     teeport = Teeport('ws://lambda-sp3:8090/');
     evaluate = teeport.useEvaluator(problem);
-    gpPredict = teeport.useProcessor('Tv10tpVPM');
+    predict = teeport.useProcessor('Tv10tpVPM');
     
-    gbest = MGGPO(evaluate,gpPredict,Npop,Ngen,Nobj,Nvar);
+    gbest = MGGPO(evaluate,predict,Npop,Ngen,Nobj,Nvar);
     teeport.cleanUp(); % disconnect from the platform
 else
     addpath GP;
     evaluate = problem;
-    gpPredict;
+    predict;
     
-    gbest = MGGPO(evaluate,gpPredict,Npop,Ngen,Nobj,Nvar);
+    gbest = MGGPO(evaluate,predict,Npop,Ngen,Nobj,Nvar);
 end
 % diary off
 
