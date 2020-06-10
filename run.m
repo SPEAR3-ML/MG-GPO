@@ -34,7 +34,7 @@ if useTeeport ~= 0
 else
     addpath GP;
     evaluate = problem;
-    predict;
+    predict = @GP_predict;
     
     gbest = MGGPO(evaluate,predict,Npop,Ngen,Nobj,Nvar);
 end
