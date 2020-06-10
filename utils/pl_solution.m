@@ -2,10 +2,10 @@ function pl_solution(varargin)
 
 if nargin == 3
     dir = varargin{1};
-    genl = str2num(varargin{2}):str2num(varargin{3});
+    genl = conv2num(varargin{2}):conv2num(varargin{3});
 elseif nargin == 2
     dir = varargin{1};
-    genl = 1:str2num(varargin{2});
+    genl = 1:conv2num(varargin{2});
 elseif nargin == 1
     dir = varargin{1};
     genl = 1:1;
