@@ -1,17 +1,25 @@
 function pl_solution(varargin)
 
-if nargin == 3
+if nargin == 4
     dir = varargin{1};
     genl = conv2num(varargin{2}):conv2num(varargin{3});
+    type = conv2num(varargin{4});
+elseif nargin == 3
+    dir = varargin{1};
+    genl = conv2num(varargin{2}):conv2num(varargin{3});
+    type = 1;
 elseif nargin == 2
     dir = varargin{1};
     genl = 1:conv2num(varargin{2});
+    type = 1;
 elseif nargin == 1
     dir = varargin{1};
     genl = 1:1;
+    type = 1;
 elseif nargin == 0
     dir = '.';
     genl = 1:1;
+    type = 1;
 end
 
 for ig=1:length(genl)
@@ -21,15 +29,16 @@ for ig=1:length(genl)
     d.gbest = gbest;
     d.v0 = v0;
     d.gen = genl(ig);
-    fprintf('norm(v0) %f, at gen %d\n',norm(v0), d.gen);
+    if type == 2
+        fprintf('norm(v0) %f, at gen %d\n',norm(v0), d.gen);
+    end
     dall(ig) = d;
     cstr{ig} = ['gen ', num2str(d.gen)];
 end
 
 %% plot
-cl = colormap;
 
-figure(206)
+figure;
 for ii=1:length(genl)
     h(ii) = plot(dall(ii).gbest(:,Nvar+1),dall(ii).gbest(:,Nvar+2),'.','markersize',20);
     % set(h(ii),'color',cl(ii*7,:));
@@ -45,17 +54,19 @@ title(['MGGPO, gbest, POP=' num2str(Npop)])
 hold on
 % set(gca,'yscale','log','xscale','log');
 
-figure(203)
-for ii=1:length(genl)
-    h(ii) = plot(dall(ii).f0(:,Nvar+1),dall(ii).f0(:,Nvar+2),'s');
-%     set(h(ii),'color',cl(ii*7,:));
-    
-    hold on
+if type == 2
+    figure;
+    for ii=1:length(genl)
+        h(ii) = plot(dall(ii).f0(:,Nvar+1),dall(ii).f0(:,Nvar+2),'s');
+        %     set(h(ii),'color',cl(ii*7,:));
+        
+        hold on
+    end
+    % hold off
+    xlabel('obj 1')
+    ylabel('obj 2')
+    title('f0')
 end
-% hold off
-xlabel('obj 1')
-ylabel('obj 2')
-title('f0')
 
 return
 
