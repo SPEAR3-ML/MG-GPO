@@ -55,6 +55,7 @@ end
 iter = 0;
 while iter < Ngen
     iter = iter + 1;
+    fprintf('working on generation %d/%d...\n',iter,Ngen);
     da.bet = 2*0.85^(iter-1); % defien the kappa
     f0(:,Nvar+1:end) = [];
     %   f0 = mopsomain(@(f,M,V)mass_eval_GP(f,da,M,V),Npop,10,Nobj,Nvar);
