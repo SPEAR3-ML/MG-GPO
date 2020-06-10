@@ -1,30 +1,21 @@
-function gbest = MGGPO(Npop,Ngen,Nobj,Nvar,varargin)
+function gbest = MGGPO(evaluate,gpPredict,Npop,Ngen,Nobj,Nvar,varargin)
 % main function for Multi-Geneartion Gaussian Process Optimizer (MG-GPO)
 % created by X. Huang, 6/18/2019
-%
-%*****************Platform: Load teeport platform************************************
-% teeport = Teeport('ws://lambda-sp3:8090/');
-% % evaluate = teeport.useEvaluator('Cx67ynqM');
-% GPy_output = teeport.useProcessor('Tv10tpVPM');  % Load the platform Processor ID
-% cleanup = @teeport.cleanUp;
-global evaluate gpPredict cleanUp
-%**************************************************************************
 
 global g_mum
 if isempty(g_mum)
     g_mum = 60;
 end
 
-if nargin==4
+if nargin == 6
     % intialize and evaluate
-    % [f0,v0,gbest] = mopso_initialize(func_mass,Npop,Ngen,Nobj,Nvar);
     M = Nobj;
     V = Nvar;
     vrange1 = ones(Nvar,1)*[0,1,1e-6]*1;  %*5
     l_limit = vrange1(:,1);
     u_limit = vrange1(:,2);
     delta_range = vrange1(:,3);
-    [f0,v0,pbest,gbest] = mopso_initialize(Npop,Nobj,Nvar);
+    [f0,v0,pbest,gbest] = mopso_initialize(evaluate,Npop,Nobj,Nvar);
     da.Xmat=f0(:,1:Nvar)';
     da.fa_list = f0(:,Nvar+1:Nvar+Nobj);
     da.mu_prior = mean(da.fa_list);
@@ -49,7 +40,7 @@ if nargin==4
     %     end
     %     save generation_0.mat
     save('generation_0.mat','-regexp','^(?!(cleanUp|evaluate|gpPredict|teeport)$).');
-elseif nargin>=5
+elseif nargin > 6
     da = varargin{1};
     
     %     da.Xmat=[da.Xmat xt];
@@ -311,5 +302,3 @@ while iter < Ngen
     %     save test -regexp ^(?!(variableToExclude1|variableToExclude2)$).
     save(['generation_' num2str(iter) '.mat'],'-regexp','^(?!(cleanUp|evaluate|gpPredict|teeport)$).');
 end
-
-cleanUp();

@@ -1,5 +1,4 @@
-function [f0,v0,pbest,gbest] = mopso_initialize(Npop,Nobj,Nvar)
-global evaluate
+function [f0,v0,pbest,gbest] = mopso_initialize(evaluate,Npop,Nobj,Nvar)
 f0 = rand(Npop,Nvar+Nobj); %uniform
 % f0 = (1-2*rand(Npop,Nvar+Nobj))*0.15+0.5; %uniform cube around center
 f0(:,Nvar+1:end) = NaN;
