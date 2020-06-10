@@ -27,10 +27,10 @@ max_rank = max(intermediate_chromosome(:,M + V + 1));
 previous_index = 0;
 for i = 1 : max_rank
     % Get the index for current rank i.e the last the last element in the
-    % sorted_chromosome with rank i. 
+    % sorted_chromosome with rank i.
     current_index = max(find(sorted_chromosome(:,M + V + 1) == i));
     % Check to see if the population is filled if all the individuals with
-    % rank i is added to the population. 
+    % rank i is added to the population.
     if current_index > pop
         % If so then find the number of individuals with in with current
         % rank i.

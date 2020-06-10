@@ -4,25 +4,25 @@ function [hdata, xm, fm] = process_scandata(g_data,Nvar,vrange,flag_plot,isel)
 %   g_data, contains all the data, each row is a solution, the first Nvar
 %       elements are the parameter values, the Nvar+1 element is the objective
 %       function value for the solution. It may have more elements that
-%       describe the solution. 
+%       describe the solution.
 %   Nvar, the number of variables, can be empty.
 %   vrange, the ranges for the parameters, needed for converting normalized
-%       parameters. By default use the global variable. 
+%       parameters. By default use the global variable.
 %   flag_plot, indicator for plotting or not. Plot 1 shows the history of
 %       all solutions. Plot 2 shows the distance of all solution to the
-%       preferred solution. 
-%   isel, select the isel (isel = 1, 2, 3, etc) best solution as the preferred 
-%       solution. This allows us to remove outliers. default to 1. 
+%       preferred solution.
+%   isel, select the isel (isel = 1, 2, 3, etc) best solution as the preferred
+%       solution. This allows us to remove outliers. default to 1.
 %
 %Output:
 %   hdata, a structure that contains the original data and sorted data
 %   fields of hdata:
 %       g_data, original data matrix, with all solutions in the order of
-%           the time of evaluation. 
+%           the time of evaluation.
 %       x_data, same as g_data, but the parameters in x_data are normalized,
-%           the last column is the distance to the preferred solution . 
+%           the last column is the distance to the preferred solution .
 %       h_data, contains the best solution in the history.
-%       hx_data, same as h_data, but the parameters in x_data are normalized. 
+%       hx_data, same as h_data, but the parameters in x_data are normalized.
 %       xm, normalized parameter of the best solution
 %       fm, the objective of the best solution
 %example:
@@ -98,11 +98,11 @@ hdata.xh_data = xh_data;
 if strcmp(flag_plot,'plot')
     figure
     a1=subplot(2,1,1)
-%     plot(1:Ncnt, g_data(:,Nvar+1),'-',1:Ncnt, h_data(:,Nvar+1),'r-'); 
+%     plot(1:Ncnt, g_data(:,Nvar+1),'-',1:Ncnt, h_data(:,Nvar+1),'r-');
     semilogy(1:Ncnt, g_data(:,Nvar+1),'-',1:Ncnt, g_data(:,Nvar+2),'r-')
     ylabel('objective')
     xlabel('cnt')
-%     legend('all', 'best')
+    %     legend('all', 'best')
     set(gca,'xlim',[1, Ncnt])
     
     
@@ -120,6 +120,6 @@ if strcmp(flag_plot,'plot')
     set(gca,'xlim',[1, Ncnt])
     
     
-    %linkaxes([a1,a2,a3],'x');
+%     linkaxes([a1,a2,a3],'x');
     linkaxes([a1,a3],'x');
 end

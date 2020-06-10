@@ -17,7 +17,7 @@ front = 1;
 F(front).f = [];
 individual = [];
 
-%% Non-Dominated sort. 
+%% Non-Dominated sort.
 % The initialized population is sorted based on non-domination. The fast
 % sort algorithm [1] is described as below for each
 
@@ -76,7 +76,7 @@ for i = 1 : N
         elseif dom_more == 0 && dom_equal ~= M
             individual(i).p = [individual(i).p j];
         end
-    end   
+    end
     if individual(i).n == 0
         x(i,M + V + 1) = 1;
         F(front).f = [F(front).f i];
@@ -84,22 +84,22 @@ for i = 1 : N
 end
 % Find the subsequent fronts
 while ~isempty(F(front).f)
-   Q = [];
-   for i = 1 : length(F(front).f)
-       if ~isempty(individual(F(front).f(i)).p)
-        	for j = 1 : length(individual(F(front).f(i)).p)
-            	individual(individual(F(front).f(i)).p(j)).n = ...
-                	individual(individual(F(front).f(i)).p(j)).n - 1;
-        	   	if individual(individual(F(front).f(i)).p(j)).n == 0
-               		x(individual(F(front).f(i)).p(j),M + V + 1) = ...
+    Q = [];
+    for i = 1 : length(F(front).f)
+        if ~isempty(individual(F(front).f(i)).p)
+            for j = 1 : length(individual(F(front).f(i)).p)
+                individual(individual(F(front).f(i)).p(j)).n = ...
+                    individual(individual(F(front).f(i)).p(j)).n - 1;
+                if individual(individual(F(front).f(i)).p(j)).n == 0
+                    x(individual(F(front).f(i)).p(j),M + V + 1) = ...
                         front + 1;
                     Q = [Q individual(F(front).f(i)).p(j)];
                 end
             end
-       end
-   end
-   front =  front + 1;
-   F(front).f = Q;
+        end
+    end
+    front =  front + 1;
+    F(front).f = Q;
 end
 
 [temp,index_of_fronts] = sort(x(:,M + V + 1));
@@ -125,7 +125,7 @@ current_index = 0;
 
 % Find the crowding distance for each individual in each front
 for front = 1 : (length(F) - 1)
-%    objective = [];
+    %    objective = [];
     distance = 0;
     y = [];
     previous_index = current_index + 1;
@@ -148,16 +148,16 @@ for front = 1 : (length(F) - 1)
         y(index_of_objectives(length(index_of_objectives)),M + V + 1 + i)...
             = Inf;
         y(index_of_objectives(1),M + V + 1 + i) = Inf;
-         for j = 2 : length(index_of_objectives) - 1
+        for j = 2 : length(index_of_objectives) - 1
             next_obj  = sorted_based_on_objective(j + 1,V + i);
             previous_obj  = sorted_based_on_objective(j - 1,V + i);
             if (f_max - f_min == 0)
                 y(index_of_objectives(j),M + V + 1 + i) = Inf;
             else
                 y(index_of_objectives(j),M + V + 1 + i) = ...
-                     (next_obj - previous_obj)/(f_max - f_min);
+                    (next_obj - previous_obj)/(f_max - f_min);
             end
-         end
+        end
     end
     distance = [];
     distance(:,1) = zeros(length(F(front).f),1);
@@ -172,8 +172,8 @@ end
 %the next 'if' block is added to trap the error of '??? Undefined function or variable "z".'
 if ~exist('z','var')
     f=sorted_based_on_front;
-%     save data_sort_error   %x M V F
-%     fprintf('check data_sort_error.mat for chromosome to see what went wrong\n')
+    %     save data_sort_error   %x M V F
+    %     fprintf('check data_sort_error.mat for chromosome to see what went wrong\n')
 else
     f = z();
 end
@@ -181,9 +181,9 @@ end
 
 %% References
 % [1] *Kalyanmoy Deb, Amrit Pratap, Sameer Agarwal, and T. Meyarivan*, |A Fast
-% Elitist Multiobjective Genetic Algorithm: NSGA-II|, IEEE Transactions on 
+% Elitist Multiobjective Genetic Algorithm: NSGA-II|, IEEE Transactions on
 % Evolutionary Computation 6 (2002), no. 2, 182 ~ 197.
 %
-% [2] *N. Srinivas and Kalyanmoy Deb*, |Multiobjective Optimization Using 
-% Nondominated Sorting in Genetic Algorithms|, Evolutionary Computation 2 
+% [2] *N. Srinivas and Kalyanmoy Deb*, |Multiobjective Optimization Using
+% Nondominated Sorting in Genetic Algorithms|, Evolutionary Computation 2
 % (1994), no. 3, 221 ~ 248.
