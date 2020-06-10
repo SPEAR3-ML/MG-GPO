@@ -10,7 +10,9 @@ function [mu, sig2] = distri_param_predicted(xnew, da,Sig2_prior, mu_prior)
 
 kvec = Sig2_prior*kernel_vector(da.Xmat,da.theta,xnew);
 ktK = kvec'*da.invKmat;
-mu = ktK*da.fa;%+mu_prior;
+% mu = ktK*da.fa;%+mu_prior;
+mu = ktK*(da.fa-mu_prior)+mu_prior;
+
 %sig2 = gaussian_kernel(xnew,xnew) - ktK*kvec;
 %sig2 = 1.0 - ktK*kvec;
 sig2 = Sig2_prior - ktK*kvec;
