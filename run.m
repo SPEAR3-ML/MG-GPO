@@ -24,10 +24,24 @@ g_cnt = 0;
 
 %% Run
 if useTeeport ~= 0
+    % Read the platform settings
+    fid = fopen('.teeport');
+    url = fgetl(fid);
+    if url == -1
+        fclose(fid);
+        error('Cannot read the url of the platform.')
+    end
+    processorId = fgetl(fid);
+    if processorId == -1
+        fclose(fid);
+        error('Cannot read the id of the GPy processor on the platform.')
+    end
+    fclose(fid);
+    
     % Connect to the platform
-    teeport = Teeport('ws://lambda-sp3:8090/');
+    teeport = Teeport(url);
     evaluate = teeport.useEvaluator(problem);
-    predict = teeport.useProcessor('Tv10tpVPM');
+    predict = teeport.useProcessor(processorId);
     
     gbest = MGGPO(evaluate,predict,Npop,Ngen,Nobj,Nvar);
     teeport.cleanUp(); % disconnect from the platform
