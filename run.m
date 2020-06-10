@@ -95,8 +95,8 @@ elseif plotResults == 5
 end
 
 %% Clean up
-dir = 'data';
-mkdir(dir);
+dir = ['data/', datestr(now,'yyyymmdd_HHMMSS')];
+dt = mkdir(dir);
 eval(['!mv gen*.mat ' dir]);
 % eval(['!cp *.m ' dir]);
 % eval(['!cp *.mat ' dir]);
