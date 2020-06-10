@@ -16,12 +16,6 @@ Ngen = 10;
 useTeeport = 1;
 plotResults = 1;
 
-%% Initialization
-global g_sigy g_cnt g_data;
-g_sigy = 0.0; % define the noise
-g_data = [];
-g_cnt = 0;
-
 %% Run
 if useTeeport ~= 0
     % Read the platform settings
