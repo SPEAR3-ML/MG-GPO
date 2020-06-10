@@ -2,11 +2,6 @@ function gbest = MGGPO(evaluate,predict,Npop,Ngen,Nobj,Nvar,varargin)
 % main function for Multi-Geneartion Gaussian Process Optimizer (MG-GPO)
 % created by X. Huang, 6/18/2019
 
-global g_mum
-if isempty(g_mum)
-    g_mum = 60;
-end
-
 if nargin == 6
     % intialize and evaluate
     M = Nobj;
@@ -80,6 +75,7 @@ while iter < Ngen
         ft = non_domination_sort_mod(ft, Nobj, Nvar);
         f0 = ft(1:Npop,1:Nvar+Nobj);
     elseif 0
+        g_mum = 60; % should be removed or change the logic
         da.bet = da.bet*1.2;
         if da.bet>1
             da.bet = 1.0;
