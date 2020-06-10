@@ -210,9 +210,9 @@ while iter < Ngen
         C1 = {C.Xmat, C.ffa};
         Y1 = {{C1,ft}};
         ft_obj = predict(Y1);
-        ft_obj1 = reshape(ft_obj(1,:,:),[],2);
-        ft_obj2 = reshape(ft_obj(2,:,:),[],2);
-        ft = [ft,ft_obj1-da.bet.*ft_obj2,ft_obj2];
+        ft_mu = reshape(ft_obj(1,:,:),[],2);
+        ft_sig = reshape(ft_obj(2,:,:),[],2);
+        ft = [ft,ft_mu-da.bet.*ft_sig,ft_sig];
         %**************************************************************************
 %         ft = mass_eval_GP(ft,da,Nobj,Nvar);
         ft = non_domination_sort_mod(ft, Nobj, Nvar);
