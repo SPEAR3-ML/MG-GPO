@@ -5,7 +5,7 @@ function gbest = MGGPO(evaluate,predict,Npop,Ngen,Nobj,Nvar,varargin)
 
 if nargin == 6
     % intialize and evaluate
-    vrange1 = ones(Nvar,1)*[0,1,1e-6]*1;  %*5
+    vrange1 = ones(Nvar,1)*[0,1,1e-6]*1;  
     l_limit = vrange1(:,1);
     u_limit = vrange1(:,2);
     [f0,v0,pbest,gbest] = mopso_initialize(evaluate,Npop,Nobj,Nvar);
@@ -30,7 +30,6 @@ if nargin == 6
     da.gbest = f0;
     
     save generation_0.mat
-%     save('generation_0.mat','-regexp','^(?!(cleanUp|evaluate|predict|teeport)$).');
 elseif nargin > 6
     da = varargin{1}; 
     %     da.Xmat=[da.Xmat xt];
@@ -199,7 +198,6 @@ while iter < Ngen
             ft = [ft, ft_mu - da.bet.*ft_sig, ft_sig];
         end
         %**************************************************************************
-%         ft = mass_eval_GP(ft,da,Nobj,Nvar);
         ft = non_domination_sort_mod(ft, Nobj, Nvar);
         cnt = 0;
         f0=[];
@@ -268,7 +266,6 @@ while iter < Ngen
         da.Sig2_prior = std(da.fa_list).^2;
         
         da.dim = Nvar;
-        %da.nf = size(f0,1);
         da.nf = size(fa,1);
         if Nobj == 1
             ffa = fa(:,Nvar+1);
@@ -283,5 +280,4 @@ while iter < Ngen
         da.gbest = f0;
     end
     save(['generation_' num2str(iter) '.mat']);
-%     save(['generation_' num2str(iter) '.mat'],'-regexp','^(?!(cleanUp|evaluate|predict|teeport)$).');
 end
