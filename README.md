@@ -30,7 +30,7 @@ To download and install the GPML Matlab Code, please go to
 http://www.gaussianprocess.org/gpml/code/matlab/doc/
 
 And you can change the mean function, covariance function and Gaussian likelihood in the GPML_predict.m
-script as you need. More options can be found in the manual of GPML Matlab Code.
+script as you need. More options can be found in the manual of GPML Matlab Code. 
 
 ## Usage
 
@@ -65,7 +65,8 @@ Npop = 10; % the population size of each generation in MG-GPO
 Ngen = 10; % the total number of generations to evolve in MG-GPO
 useTeeport = 0; % if use the Teeport platform
                 % set to 1 to use the local GP module with a cost of decreasing performance
-                % set to 2 to use the GPML package with a better performance
+                % set to 2 to use the GPML package with a better performance 
+                  (you should addpath for GPML package or run the startup.m script in the GPML package)
 ```
 
 Set `problem` to the name of your problem, and change `Nobj` and `Nvar` accordingly. The settings for `Npop` and `Ngen` depend on the problem to be optimized, but `Npop = 80` and `Ngen = 100` are usually a good starting point. Set `useTeeport = 1` to get the best performance of MG-GPO.
