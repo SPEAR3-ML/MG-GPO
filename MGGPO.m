@@ -1,15 +1,13 @@
 function gbest = MGGPO(evaluate,predict,Npop,Ngen,Nobj,Nvar,varargin)
 % main function for Multi-Geneartion Gaussian Process Optimizer (MG-GPO)
 % created by X. Huang, 6/18/2019
+% Modified by M. Song and Z. Zhang, 3/25/2021
 
 if nargin == 6
     % intialize and evaluate
-    M = Nobj;
-    V = Nvar;
     vrange1 = ones(Nvar,1)*[0,1,1e-6]*1;  %*5
     l_limit = vrange1(:,1);
     u_limit = vrange1(:,2);
-    delta_range = vrange1(:,3);
     [f0,v0,pbest,gbest] = mopso_initialize(evaluate,Npop,Nobj,Nvar);
     da.Xmat=f0(:,1:Nvar)';
     da.fa_list = f0(:,Nvar+1:Nvar+Nobj);
@@ -18,8 +16,11 @@ if nargin == 6
     da.v0 = v0;
     da.dim = Nvar;
     da.nf = size(f0,1);
-    %     da.bet = 2;
-    ffa = [f0(:,Nvar+1), f0(:,Nvar+2)];
+    if Nobj == 1
+        ffa = f0(:,Nvar+1);
+    elseif Nobj == 2
+        ffa = [f0(:,Nvar+1), f0(:,Nvar+2)];
+    end
     Xmat = da.Xmat';
     
     %theta = 0.1*ones(Nvar,Nobj);
@@ -28,21 +29,14 @@ if nargin == 6
     da.pbest = pbest;
     da.gbest = f0;
     
-    %     sigy = 0; %for now
-    %     for ii=1:Nobj
-    %         Kmat = da.Sig2_prior(ii)*kernel_matrix(da.Xmat,da.theta); %da.theta(:,ii));
-    %         da.invKmat_list{ii} = inv(Kmat+sigy^2*eye(da.nf));
-    %     end
-    %     save generation_0.mat
-    save('generation_0.mat','-regexp','^(?!(cleanUp|evaluate|predict|teeport)$).');
+    save generation_0.mat
+%     save('generation_0.mat','-regexp','^(?!(cleanUp|evaluate|predict|teeport)$).');
 elseif nargin > 6
-    da = varargin{1};
-    
+    da = varargin{1}; 
     %     da.Xmat=[da.Xmat xt];
     %     da.fa = [da.fa; ynew];
     %     da.nf = nf;
     %     da.invKmat = inv(Kmat+sigy^2*eye(nf))
-    
     gbest = da.gbest;
     v0 = da.v0;
 end
@@ -51,7 +45,7 @@ iter = 0;
 while iter < Ngen
     iter = iter + 1;
     fprintf('working on generation %d/%d...\n',iter,Ngen);
-    da.bet = 2*0.85^(iter-1); % defien the kappa
+    da.bet = 2*0.85^(iter-1); % defien the kappa for aquisition function
     f0(:,Nvar+1:end) = [];
     %   f0 = mopsomain(@(f,M,V)mass_eval_GP(f,da,M,V),Npop,10,Nobj,Nvar);
     if 0 %random
@@ -104,9 +98,7 @@ while iter < Ngen
         end
     elseif 1
         %******************Using PSO to generate trial solutions*******************
-        % w = 0.4; %gset_mopso.w;
-        % c1 = 1.0; %gset_mopso.c1;
-        % c2 = 1.0; %gset_mopso.c2;
+        % w = 0.4; % c1 = 1.0; % c2 = 1.0; 
         w_max = 0.9; w_min = 0.4;
         c1_max = 2.5; c2_max = 2.5;
         c1_min = 0.5; c2_min = 0.5;
@@ -143,7 +135,7 @@ while iter < Ngen
                         delta(j) = 1 - (2*(1-r(j))+2*(r(j)-0.5)*(1-(u_limit(j)-x0(j))/(u_limit(j)-l_limit(j)))^(mum+1))^(1/(mum+1));
                     end
                 end
-                ft(cnt,:) = x0+delta;
+                ft(cnt,:) = x0 + delta;
                 %                ft(cnt,:) = x0+(1-2*rand(1,Nvar))*0.05;
                 %                ft(cnt,:) = x0+(1-2*rand(1,Nvar))*0.03;
             end
@@ -171,15 +163,6 @@ while iter < Ngen
                             bq(j) = (1/(2*(1 - u(j))))^(1/(mu+1));
                         end
                         bq(j) = bq(j)*(-1)^randi([0,1]);
-%                         uu(j) = rand(1);
-%                         if uu(j) < 0.5
-%                             bq(j) = 1;
-%                         end
-%                         uuu(j) = rand(1);
-%                         uuuu(j) = uuu(1);
-%                         if uuuu(j) > 0.5
-%                             bq(j) = 1;
-%                         end
                         child_1(j) = 0.5*(((1 + bq(j))*parent_1(j)) + (1 - bq(j))*parent_2(j));
                         child_2(j) = 0.5*(((1 - bq(j))*parent_1(j)) + (1 + bq(j))*parent_2(j));
                     end
@@ -201,14 +184,20 @@ while iter < Ngen
                 end
             end
         end
-        %**********************GPy: Send to GPy and then take output***************s
+        %**********************Send to GP and then take output************
         C = load(['generation_' num2str(iter-1) '.mat'],'Xmat', 'ffa');
         C1 = {C.Xmat, C.ffa};
         Y1 = {{C1,ft}};
         ft_obj = predict(Y1);
-        ft_mu = reshape(ft_obj(1,:,:),[],2);
-        ft_sig = reshape(ft_obj(2,:,:),[],2);
-        ft = [ft,ft_mu-da.bet.*ft_sig,ft_sig];
+        if Nobj == 1
+            ft_mu = ft_obj(:,1);
+            ft_sig = ft_obj(:,2);
+            ft = [ft, ft_mu - da.bet.*ft_sig];
+        elseif Nobj == 2
+            ft_mu = reshape(ft_obj(1,:,:),[],2);
+            ft_sig = reshape(ft_obj(2,:,:),[],2);
+            ft = [ft, ft_mu - da.bet.*ft_sig, ft_sig];
+        end
         %**************************************************************************
 %         ft = mass_eval_GP(ft,da,Nobj,Nvar);
         ft = non_domination_sort_mod(ft, Nobj, Nvar);
@@ -254,8 +243,7 @@ while iter < Ngen
     f0m = f0; % model predicted solutions
     X = f0(:,1:Nvar);
     Y = evaluate(X);
-    f0(:,Nvar+1:Nvar+Nobj) = Y;
-    %     f0=func_mass(f0, Nobj, Nvar); % evaluted solutions
+    f0(:,Nvar+1:Nvar+Nobj) = Y; % evaluated solutions
     
     %update pbest
     for ii=1:Npop
@@ -282,20 +270,18 @@ while iter < Ngen
         da.dim = Nvar;
         %da.nf = size(f0,1);
         da.nf = size(fa,1);
-        ffa = [fa(:,Nvar+1), fa(:,Nvar+2)];
+        if Nobj == 1
+            ffa = fa(:,Nvar+1);
+        elseif Nobj ==2 
+            ffa = [fa(:,Nvar+1), fa(:,Nvar+2)];
+        end
         Xmat = da.Xmat';
         
         %theta = 0.1*ones(Nvar,Nobj);
         theta = 0.4;
         da.theta = theta;  %scalar for now, should be Nvar \times Nobj in dimension
         da.gbest = f0;
-        
-        %         sigy = 1e-4; %for now
-        %         for ii=1:Nobj
-        %             Kmat = da.Sig2_prior(ii)*kernel_matrix(da.Xmat,da.theta); %da.theta(:,ii));
-        %             da.invKmat_list{ii} = pinv(Kmat+sigy^2*eye(da.nf));
-        %         end
     end
-    %     save test -regexp ^(?!(variableToExclude1|variableToExclude2)$).
-    save(['generation_' num2str(iter) '.mat'],'-regexp','^(?!(cleanUp|evaluate|predict|teeport)$).');
+    save(['generation_' num2str(iter) '.mat']);
+%     save(['generation_' num2str(iter) '.mat'],'-regexp','^(?!(cleanUp|evaluate|predict|teeport)$).');
 end

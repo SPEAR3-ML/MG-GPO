@@ -25,6 +25,13 @@ And follow the instructions in the README.
 
 **Note that the Teeport platform can only be accessed within the SLAC network (on-site or vpn)!**
 
+### Download and install the GPML Matlab Code 
+To download and install the GPML Matlab Code, please go to
+http://www.gaussianprocess.org/gpml/code/matlab/doc/
+
+And you can change the mean function, covariance function and Gaussian likelihood in the GPML_predict.m
+script as you need. More options can be found in the manual of GPML Matlab Code.
+
 ## Usage
 
 ### Test run
@@ -56,16 +63,17 @@ Nobj = 2; % the number of the objectives
 Nvar = 30; % the number of the input variables
 Npop = 10; % the population size of each generation in MG-GPO
 Ngen = 10; % the total number of generations to evolve in MG-GPO
-useTeeport = 1; % if use the Teeport platform
-                % set to 0 to use the local GP module with a cost of decreasing performance
-plotResults = 1; % which type of the results should be visualized after the run
-                 % set to 0 to disable the plotting feature
+useTeeport = 0; % if use the Teeport platform
+                % set to 1 to use the local GP module with a cost of decreasing performance
+                % set to 2 to use the GPML package with a better performance
 ```
 
 Set `problem` to the name of your problem, and change `Nobj` and `Nvar` accordingly. The settings for `Npop` and `Ngen` depend on the problem to be optimized, but `Npop = 80` and `Ngen = 100` are usually a good starting point. Set `useTeeport = 1` to get the best performance of MG-GPO.
 
 ### Visualize the results of the history runs
 
+The data (all the varaible values at every generation) of each run will be saved as generation_*.mat.  
+You can plot the gbest (global best solutions) to see the evolution of optmization process. 
 The data (all the varaible values at every generation) of each run will be put into a sub-folder in the `data` folder of the root and named as `yyyymmdd_HHMMSS`, where the datetime string shows the starting time of the run. To visualize it, in Matlab command line, run:
 
 ```matlab

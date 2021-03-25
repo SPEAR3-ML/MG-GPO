@@ -10,7 +10,7 @@ elseif nargin == 3
     type = 1;
 elseif nargin == 2
     dir = varargin{1};
-    genl = 1:conv2num(varargin{2});
+    genl = conv2num(varargin{2});%1:conv2num(varargin{2});
     type = 1;
 elseif nargin == 1
     dir = varargin{1};
