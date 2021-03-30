@@ -4,44 +4,25 @@ This is the Matlab version of the MG-GPO algorithm. Currently MG-GPO has only be
 
 If you'd like to use it in your research or project, please cite the following paper:
 
-- MG-GPO  
-	[Multi-objective multi-generation Gaussian process optimizer for design optimization](https://arxiv.org/abs/1907.00250)
+- [Multi-objective multi-generation Gaussian process optimizer for design optimization](https://arxiv.org/abs/1907.00250)
+  > Huang, Xiaobiao, Minghao Song, and Zhe Zhang. "Multi-objective multi-generation Gaussian process optimizer for design optimization." arXiv preprint arXiv:1907.00250 (2019).
 
 ## Prerequisites  
 
-The following setup is not necessary but highly recommended if you want to archive the same performance as shown in the MG-GPO paper.
+The following setup is not necessary but highly recommended if you want to archive a similar performance as shown in the MG-GPO paper.
 
-### Install the Teeport client for Matlab
+### Download and install the GPML Matlab code 
+To download and install the GPML Matlab code, please follow the official instructions [here](http://www.gaussianprocess.org/gpml/code/matlab/doc/).
 
-The [Teeport client for Matlab](https://github.com/SPEAR3-ML/teeport-client-matlab) is the Matlab client of the algorithm testing/benchmarking/optimizing platform **Teeport**. With the client installed, you can talk to the Teeport platform and use the optimizers/evaluators/processors provided by the platform within you Matlab optimize/evaulate code. The better GP modeling/prediction module in MG-GPO makes use of the **GPy processor** on the platform. 
-
-To install the client, clone the repo:
-
-```bash
-git clone https://github.com/SPEAR3-ML/teeport-client-matlab.git
-```
-
-And follow the instructions in the README.
-
-**Note that the Teeport platform can only be accessed within the SLAC network (on-site or vpn)!**
-
-### Download and install the GPML Matlab Code 
-To download and install the GPML Matlab Code, please go to
-http://www.gaussianprocess.org/gpml/code/matlab/doc/
-
-And you can change the mean function, covariance function and Gaussian likelihood in the GPML_predict.m
-script as you need. More options can be found in the manual of GPML Matlab Code. 
+You can change the mean function, covariance function and Gaussian likelihood in the `GPML/GPML_predict.m` script as you need. More options can be found in the manual of GPML Matlab code. 
 
 ## Usage
 
 ### Test run
 
-1. Install the Teeport client for Matlab (and activate it in Matlab, of course)
-2. Make sure you're connecting to the SLAC network
-3. Place the `.teeport` file obtained from the authors in the root of the repo
-4. Execute the `run.m` script within Matlab
+1. Execute the `run.m` script within Matlab
 
-The test run will optimize the 30D ZDT2 problem with MG-GPO. The test run should be completed in 1 min.
+The test run will optimize the 30D ZDT2 problem with MG-GPO + local GP. The test run should be done in 1 min.
 
 ### Optimize your own objective function
 
@@ -53,29 +34,29 @@ The signature of the function should be like:
 function obj = YOUR_BADASS_PROBLEM(x)
 ```
 
-Please refer to the demo objective function ZDT2 that locates in the `evaluators` folder to get more details.
+Please refer to the demo objective functions Rosenbrock (single objective) and ZDT2 (multi-objective) that located in the `evaluators` folder to get more details.
 
 After completing your objective function setup, tune the MG-GPO settings to your needs. The settings of MG-GPO are located at the **Configs** section of the `run.m` script. They are:
 
 ```matlab
 problem = @ZDT2; % the objective funtion to be minimized
-Nobj = 2; % the number of the objectives
-Nvar = 30; % the number of the input variables
-Npop = 10; % the population size of each generation in MG-GPO
-Ngen = 10; % the total number of generations to evolve in MG-GPO
-useTeeport = 0; % if use the Teeport platform
-                % set to 1 to use the local GP module with a cost of decreasing performance
-                % set to 2 to use the GPML package with a better performance 
-                  (you should addpath for GPML package or run the startup.m script in the GPML package)
+Nobj = 2;        % the number of the objectives
+Nvar = 30;       % the number of the input variables
+Npop = 10;       % the population size of each generation in MG-GPO
+Ngen = 10;       % the total number of generations to evolve in MG-GPO
+useGPML = 0;     % if use the GPML package
+                 % set to 0 to use the local GP module with a cost of
+                 % decreased performance
+                 % set to 1 to use the GPML package with a better performance
+                 % You should addpath for GPML package or run the startup.m
+                 % script in the GPML package
 ```
 
-Set `problem` to the name of your problem, and change `Nobj` and `Nvar` accordingly. The settings for `Npop` and `Ngen` depend on the problem to be optimized, but `Npop = 80` and `Ngen = 100` are usually a good starting point. Set `useTeeport = 1` to get the best performance of MG-GPO.
+Set `problem` to the name of your problem, and change `Nobj` and `Nvar` accordingly. The settings for `Npop` and `Ngen` depend on the problem to be optimized, but `Npop = 80` and `Ngen = 100` are usually a good starting point. Set `useGPML = 1` to get the better performance of MG-GPO.
 
-### Visualize the results of the history runs
+### Access and visualize the history runs data
 
-The data (all the varaible values at every generation) of each run will be saved as generation_*.mat.  
-You can plot the gbest (global best solutions) to see the evolution of optmization process. 
-The data (all the varaible values at every generation) of each run will be put into a sub-folder in the `data` folder of the root and named as `yyyymmdd_HHMMSS`, where the datetime string shows the starting time of the run. To visualize it, in Matlab command line, run:
+The data (all the varaible values at every generation) of each run will be saved as `generation_*.mat` file and put into the `data/yyyymmdd_HHMMSS` folder in the root directory, where the datetime string shows the starting time of the run. To visualize the evolution of the optmization process, in Matlab command line, run:
 
 ```matlab
 pl_solution 'data/yyyymmdd_HHMMSS' [[start] end]
