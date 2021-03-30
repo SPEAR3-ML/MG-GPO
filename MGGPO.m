@@ -2,6 +2,16 @@ function gbest = MGGPO(evaluate,predict,Npop,Ngen,Nobj,Nvar,varargin)
 % main function for Multi-Geneartion Gaussian Process Optimizer (MG-GPO)
 % created by X. Huang, 6/18/2019
 % Modified by M. Song and Z. Zhang, 3/25/2021
+%
+% Reference: Huang, Xiaobiao, Minghao Song, and Zhe Zhang. "Multi-objective
+% multi-generation Gaussian process optimizer for design optimization." arXiv 
+% preprint arXiv:1907.00250 (2019).
+%
+% Disclaimer: The MG-GPO algorithm or the Matlab MG-GPO code comes with
+% absolutely NO warranty. The author of the MG-GPO method and the Matlab MG-GPO
+% code does not take any responsibility for any damage to equipments or
+% personnel injury that may result from the use of the algorithm or the code.
+%
 
 if nargin == 6
     % intialize and evaluate
