@@ -15,9 +15,7 @@ function gbest = MGGPO(evaluate,predict,Npop,Ngen,Nobj,Nvar,varargin)
 
 if nargin == 6
     % intialize and evaluate
-    vrange1 = ones(Nvar,1)*[0,1,1e-6]*1;  
-    l_limit = vrange1(:,1);
-    u_limit = vrange1(:,2);
+    
     [f0,v0,pbest,gbest] = mopso_initialize(evaluate,Npop,Nobj,Nvar);
     da.Xmat=f0(:,1:Nvar)';
     da.fa_list = f0(:,Nvar+1:Nvar+Nobj);
@@ -38,6 +36,7 @@ if nargin == 6
     da.theta = theta;  %scalar for now, should be Nvar \times Nobj in dimension
     da.pbest = pbest;
     da.gbest = f0;
+    da.iter = 0;
     
     save generation_0.mat
 elseif nargin > 6
@@ -46,11 +45,19 @@ elseif nargin > 6
     %     da.fa = [da.fa; ynew];
     %     da.nf = nf;
     %     da.invKmat = inv(Kmat+sigy^2*eye(nf))
+    
     gbest = da.gbest;
+    pbest = da.pbest;
     v0 = da.v0;
+    f0 = da.gbest;
+    
 end
+vrange1 = ones(Nvar,1)*[0,1,1e-6]*1;  
+l_limit = vrange1(:,1);
+u_limit = vrange1(:,2);
 
-iter = 0;
+    
+iter = da.iter;
 while iter < Ngen
     iter = iter + 1;
     fprintf('working on generation %d/%d...\n',iter,Ngen);
@@ -289,5 +296,6 @@ while iter < Ngen
         da.theta = theta;  %scalar for now, should be Nvar \times Nobj in dimension
         da.gbest = f0;
     end
+    da.iter = iter;
     save(['generation_' num2str(iter) '.mat']);
 end
